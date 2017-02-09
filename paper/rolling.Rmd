@@ -1,0 +1,35 @@
+---
+title: "Rolling Sales Data"
+author: "Laurie Harris"
+date: "February 7, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data
+
+The dataset Rolling Sales Brooklyn was downloaded from the following website:
+http://www1.nyc.gov/assets/finance/downloads/pdf/rolling_sales/rollingsales_brooklyn.xls
+
+After analyzing the data and excluding outliers that we believed were errors, we were able to determine that a log 10 transformation would produce the most relevant results.  This scatter plot shows the relationship between total square feet and sales price for 1- 2- and 3- family homes in Brooklyn.
+
+
+```{r bk, echo=FALSE}
+setwd("C://Projects//6306//Rollingsales//data")
+bk <- read.csv("rollingsales_brooklyn.csv",skip=4,header=TRUE)
+bk$SALE.PRICE.N <- as.numeric(gsub("[^[:digit:]]","", bk$SALE.PRICE))
+names(bk) <- tolower(names(bk))
+bk$gross.square.feet.n <- as.numeric(gsub("[^[:digit:]]","", bk$gross.square.feet))
+bk$land.square.feet.n <- as.numeric(gsub("[^[:digit:]]","", bk$land.square.feet))
+bk$year.built.n <- as.numeric(gsub("[^[:digit:]]","", bk$year.built))
+bk.sale <- bk[bk$sale.price.n!=0,]
+bk.homes <- bk.sale[which(grepl("FAMILY",bk.sale$building.class.category)),]
+bk.homes$outliers <- (log10(bk.homes$sale.price.n) <=5) + 0
+bk.homes <- bk.homes[which(bk.homes$outliers==0),]
+plot(log10(bk.homes$gross.square.feet.n),log10(bk.homes$sale.price.n),xlab = "Square Feet", ylab = "Sales Price")
+
+```
+
